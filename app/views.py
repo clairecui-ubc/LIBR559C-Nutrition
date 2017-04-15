@@ -181,7 +181,13 @@ def nutrition_amount():
             lack_mineral=lack_mineral,
             lack_vitamin=lack_vitamin,
             form=form)
-        
+
+
+#------------------------------#
+#------The Third page----------#
+#------Recommendation ---------#
+#------------------------------#            
+
 @app.route('/recommendation')
 
 def recommend_meal():

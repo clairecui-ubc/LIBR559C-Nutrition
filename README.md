@@ -2,7 +2,7 @@
 This is the final project for LIBR 559C of UBC iSchool
 contributed by: Ruiqi Chen, Can (Claire) Cui, Wendy Lu 
 
-##**Run the website locally:**
+## Run the website locally
 
 1. clone the folder to the local machine
 2. run in command line

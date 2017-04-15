@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+</head>
+<body>
+<div>Nutrition Calculator <a href="/index">Home</a></div>
+<h1 style="color: #5e9ca0;">Your Assessment</h1>
+<h2 style="color: #2e6c80;">The amounts of nutrition you took today are:</h2>
+<h3>Vitamins</h3>
+{% for key,value in sum_vitamins.items() %}
+    <p>{{key}}     <b>{{value}}</b>{{nutrition_unit[key]}}</p>
+{% endfor %}
+<h3>Minerals</h3>
+{% for key,value in sum_minerals.items() %}
+    <p>{{key}}     <b>{{value}}</b>{{nutrition_unit[key]}}</p>
+{% endfor %}
+<p>&nbsp;</p>
+<h2 style="color: #2e6c80;">You current need more of the following nutrition:</h2>
+<h3>Vitamins</h3>
+{% for key,value in lack_vitamin.items(): %}
+    {%if value>0%}
+    <p>{{key}}    <b>{{value}}</b>{{nutrition_unit[key]}}</p>
+	{%endif%}
+{% endfor %}
+<h3>Minerals</h3>
+{% for key,value in lack_mineral.items(): %}
+	{%if value>0%}
+    <p>{{key}}    <b>{{value}}</b>{{nutrition_unit[key]}}</p>
+	{%endif%}
+{% endfor %}
+
+<form action="http://localhost:5000/yournutrition" method="POST" name="Recommendation">
+{{ form.csrf_token }}
+{{ form.hidden_tag()}}
+<h3 style="color: #2e6c80"><span style="text-decoration: underline;">{{form.submit(value='Recommendation')}}</span></h3></form>
+<p>&nbsp;</p>
+<p style="text-align: center;"><img src="http://images.lifesambrosia.com/photos/misc/healthy-recipes.jpg" alt="" width="610" height="460" /></p>
+<p style="text-align: center;">&nbsp;</p>
+</body>
+</html>
+

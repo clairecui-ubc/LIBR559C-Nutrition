@@ -1,6 +1,5 @@
 from flask import render_template, flash, redirect,request,url_for,session
 from app import app
-from .forms import LoginForm
 from .forms import IndexNumber, Recommendation
 import xml.etree.ElementTree as ET
 

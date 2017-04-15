@@ -15,7 +15,6 @@ jsonschema==2.6.0
 lxml==3.7.3
 ply==3.10
 prompt-toolkit==1.0.13
-psycopg2==2.5.1
 Pygments==2.2.0
 pyparsing==2.2.0
 python-dateutil==2.6.0

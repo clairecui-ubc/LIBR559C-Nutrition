@@ -7,3 +7,4 @@ To run it locally:
 
 2. run in command line
      $pip install -r requirements.txt
+3. $python run.py

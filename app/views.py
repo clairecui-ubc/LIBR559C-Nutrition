@@ -9,15 +9,24 @@ parser = ET.XMLParser(encoding="utf-8")  #Using Parser to format the data
 root = ET.fromstring(xmlstring,parser=parser)
 
 # index view function suppressed for brevity
+# Three pages: homepage,nutrition_amount, recommend_meal
+
+#-------------------------#
+#------The first page-----#
+#------Home Page ---------#
+#-------------------------#
 
 @app.route('/',methods = ['GET', 'POST'])
 @app.route('/index',methods = ['GET', 'POST'])
 
 def homepage():
     
-    form = IndexNumber() #This is defined in the forms.py
+    #Forms are defined in the forms.py   
+    form = IndexNumber() 
              
-    
+    # ---If the user have input index number in the form,--#
+    # ---Save the number to the session--------------------#
+    # ---Redirect to the assessment page ------------------#
     if request.method == 'POST':
         if form.validate():
             session['index1']=form.index1.data
@@ -27,30 +36,40 @@ def homepage():
             session['index5']=form.index5.data
             session['gender']=form.gender.data
             return redirect(url_for('nutrition_amount'))
-            
+        
+        # ----If the number user input is wrong, ------#
+        # -print the message and link back to homepage-#
         else:
             flash('All fields are required.')
             return render_template("home.html",
                 title = 'Home',
                 form=form)
-            
+    
+    #---If the route is access directly from the url,---#
+    #---get to homepage --------------------------------#    
     elif request.method == 'GET':
         flash('haha')
         return render_template("home.html",
             title = 'Home',
             form=form)
         
-                
+#--------------------------#
+#------The Second page-----#
+#------Assessment ---------#
+#--------------------------#               
 
 @app.route('/yournutrition', methods=['GET', 'POST'])
 
 def nutrition_amount(): 
     app.app_context()
+    #---Unify the unit of the nutrition---#
     nutrition_unit={'Niacin': 'mg', 'Vitamin E (Alpha Tocopherol)': 'mg', 'Sodium': 'mg', 'Beta Tocopherol': 'mg', 'Vitamin D': 'IU', 'Selenium': 'mcg', 'Thiamin': 'mg', 'Folate': 'mcg', 'Vitamin B12': 'mcg', 'Choline': 'mg', 'Dietary Folate Equivalents': 'mcg', 'Beta Carotene': 'mcg', 'Potassium': 'mg', 'Lutein+Zeaxanthin': 'mcg', 'Lycopene': 'mcg', 'Vitamin B6': 'mg', 'Pantothenic Acid': 'mg', 'Folic Acid': 'mcg', 'Phosphorus': 'mg', 'Retinol': 'mcg', 'Manganese': 'mg', 'Betaine': 'mg', 'Vitamin C': 'mg', 'Beta Cryptoxanthin': 'mcg', 'Riboflavin': 'mg', 'Magnesium': 'mg', 'Iron': 'mg', 'Retinol Activity Equivalent': 'mcg', 'Vitamin K': 'mcg', 'Fluoride': 'mcg', 'Copper': 'mg', 'Gamma Tocopherol': 'mg', 'Calcium': 'mg', 'Vitamin A': 'IU', 'Food Folate': 'mcg', 'Alpha Carotene': 'mcg', 'Zinc': 'mg', 'Delta Tocopherol': 'mg'}
-    #result=request.form
-    #indexes=[1,2,3,4]
     
     form=Recommendation()
+    
+    #----Index Number is aquired from the form in homepage-----------------#
+    #----Only the first column is required, so the others might be empty---#
+    #----Only save indexes that are not empty------------------------------#
     indexes=[session['index1']]
     if session['index5']!=None:
         indexes=[session['index1'],session['index2'],session['index3'],session['index4'],session['index5']]
@@ -63,12 +82,15 @@ def nutrition_amount():
     
     gender=session['gender']
     
+    #-------Use dictionaries to store the total amount of nutrition--------#
     sum_vitamins={}
     sum_minerals={}
     
     for index in indexes:
-        for nutrition in root[index-1]:
+        for nutrition in root[index-1]:  # Use the index number to locate nutrition facts of recipe
             if nutrition.tag=='Vitamins':
+            
+            #---Calculate Vitamins and Minerals Independently---#
                 for child_of_nutrition in nutrition:
                     if child_of_nutrition.attrib['amount']!='~' and child_of_nutrition.attrib['amount']!='0.0' :
                         #print child_of_nutrition.attrib['name'],child_of_nutrition.attrib['amount'],child_of_nutrition.attrib['unit']
@@ -77,7 +99,7 @@ def nutrition_amount():
 
                         else:
                             sum_vitamins[child_of_nutrition.attrib['name']]=float(child_of_nutrition.attrib['amount'])
-                            #sum_nutrition[child_of_vitamins.attrib['name']]['unit']=child_of_vitamins.attrib['unit']
+                            
             elif  nutrition.tag=='Minerals':
                  for child_of_nutrition in nutrition:
                     if child_of_nutrition.attrib['amount']!='~' and child_of_nutrition.attrib['amount']!='0.0' :
@@ -86,6 +108,8 @@ def nutrition_amount():
                             sum_minerals[child_of_nutrition.attrib['name']]=float(sum_minerals[child_of_nutrition.attrib['name']])+float(child_of_nutrition.attrib['amount'])
                         else:
                             sum_minerals[child_of_nutrition.attrib['name']]=float(child_of_nutrition.attrib['amount'])
+    
+    #---The need for nutritions are stored in need_nutrition---#
     need_nutrition={
         'male_minerals':{'Copper': 900, 'Zinc': 11, 'Sodium': 2300, 'Selenium': 55, 'Manganese': 2.3, 'Calcium': 1000, 'Magnesium': 420, 'Iron': 8, 'Potassium': 4700, 'Fluoride': 4, 'Phosphorus': 700},
         'male_vitamins':{'Niacin': 14, 'Vitamin E (Alpha Tocopherol)': 15, 'Thiamin': 1.1, 'Folate': 400, 'Vitamin C': 75, 'Vitamin B12': 2.4, 'Vitamin A': 900, 'Riboflavin': 1.1, 'Choline': 550, 'Vitamin D': 15, 'Vitamin K': 120, 'Vitamin B6': 1.5, 'Pantothenic Acid': 5},
@@ -93,12 +117,19 @@ def nutrition_amount():
         'female_minerals':{'Copper': 1000, 'Zinc': 8, 'Sodium': 2300, 'Selenium': 55, 'Manganese': 1.8, 'Calcium': 1200, 'Magnesium': 320, 'Iron': 18, 'Potassium': 4700, 'Fluoride': 3, 'Phosphorus': 700}
     }
     
+    #----Lack of vitamins----#
+    
     lack_vitamin={}
     for key, value in need_nutrition[gender+'_vitamins'].items():
+        #--If the type of nutrition intake is in the need_nutrition list--#
+        #--Calculate the lack of nutrition using the difference  ---------#
         if key in sum_vitamins.keys():
             lack_vitamin[key]=value-sum_vitamins[key]
+        #--Otherwise the lack of nutrition equals to the total needs------#
         else:
             lack_vitamin[key]=value
+    
+    #-----Lack of minerals----#
     
     lack_mineral={}
     for key, value in need_nutrition[gender+'_minerals'].items():
@@ -107,6 +138,8 @@ def nutrition_amount():
         else:
             lack_mineral[key]=value
     
+    #----Also, calculate the portion of lack in nutrition----#
+    #----portion=lack_nutritions/need_nutrtions--------------#
     lack_nutrition_portion={}
     for key,value in lack_vitamin.items():
         if value>0:
@@ -116,8 +149,13 @@ def nutrition_amount():
             lack_nutrition_portion[key]=float(value)/need_nutrition[gender+'_minerals'][key]
     
     
+    #----If the user click "recommendation" bottom,------#
+    #----Redirect to recommendations page ---------------#
+    
     if request.method == 'POST' and form.validate():
     
+        #-----Recommend the recipe with the most amount of the nutrition-----#
+       
         recommendations={}
         for key,value in lack_nutrition_portion.items():
             if  key in lack_mineral.keys() and value>0:        
@@ -148,7 +186,9 @@ def nutrition_amount():
 
 def recommend_meal():
     nutrition_unit={'Niacin': 'mg', 'Vitamin E (Alpha Tocopherol)': 'mg', 'Sodium': 'mg', 'Beta Tocopherol': 'mg', 'Vitamin D': 'IU', 'Selenium': 'mcg', 'Thiamin': 'mg', 'Folate': 'mcg', 'Vitamin B12': 'mcg', 'Choline': 'mg', 'Dietary Folate Equivalents': 'mcg', 'Beta Carotene': 'mcg', 'Potassium': 'mg', 'Lutein+Zeaxanthin': 'mcg', 'Lycopene': 'mcg', 'Vitamin B6': 'mg', 'Pantothenic Acid': 'mg', 'Folic Acid': 'mcg', 'Phosphorus': 'mg', 'Retinol': 'mcg', 'Manganese': 'mg', 'Betaine': 'mg', 'Vitamin C': 'mg', 'Beta Cryptoxanthin': 'mcg', 'Riboflavin': 'mg', 'Magnesium': 'mg', 'Iron': 'mg', 'Retinol Activity Equivalent': 'mcg', 'Vitamin K': 'mcg', 'Fluoride': 'mcg', 'Copper': 'mg', 'Gamma Tocopherol': 'mg', 'Calcium': 'mg', 'Vitamin A': 'IU', 'Food Folate': 'mcg', 'Alpha Carotene': 'mcg', 'Zinc': 'mg', 'Delta Tocopherol': 'mg'}
+    
     recommendations=session['recommendations']
+    
     return render_template('Recommendation.html',
         title='Recommendation',
         recommendations=recommendations,
